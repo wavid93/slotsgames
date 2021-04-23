@@ -114,32 +114,7 @@ class FreeSlotsController extends Controller
 			}
 		}
 
-		$usedFilterTypes = array_values($slots->pluck('filter_attribute_ids')->flatten()->unique()->toArray());
-
-		$allSoftware = collect($slots->pluck('software')->toArray());
-		$usedSoftware = [];
-		foreach ($allSoftware as $software) {
-			$usedSoftware[] = $software[0]->name;
-		}
-		$usedSoftware = array_values(array_unique($usedSoftware));
-
-		$filterTypes = $filterAttributes->filter(function ($filter) use ($usedFilterTypes, $usedSoftware) {
-			if ($filter->knack_field == 'software' && !in_array($filter->knack_value, $usedSoftware)) {
-				return false;
-			}
-			if ($filter->knack_field !== 'software' && !in_array($filter->id, $usedFilterTypes)) {
-				return false;
-			}
-
-			return true;
-		})->mapToGroups(function ($item, $key) {
-			return [$item['filters'][0]->name . '-' . $item['filters'][0]->id => (object)[
-				'id' => $item['id'],
-				'name' => $item['name'],
-				'knack_field' => $item['knack_field'],
-				'knack_value' => $item['knack_value'],
-			]];
-		});
+	
 
 		return response()->json([
 			'slots' => $slots,
